@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useChatwootContext } from './hooks/useChatwootContext.js';
-import { saveToCRM, saveLeadId } from './services/n8n.js';
+import { saveToCRM } from './services/n8n.js';
 import { formatToISO } from './utils/formatters.js';
 import { LoadingSpinner } from './components/LoadingSpinner.jsx';
 import { ErrorState } from './components/ErrorState.jsx';
 import { ContactHeader } from './components/ContactHeader.jsx';
-import { ZiptimeAlert } from './components/ZiptimeAlert.jsx';
 import { MessageList } from './components/MessageList.jsx';
 import { SendButton } from './components/SendButton.jsx';
 
 export default function App() {
-  const { context, loading, timedOut, retry } = useChatwootContext();
+  const { context, loading, timedOut, retry, localLeadId, setLocalLeadId } = useChatwootContext();
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [sendStatus, setSendStatus] = useState('idle');
   const [sendError, setSendError] = useState('');
@@ -38,8 +37,7 @@ export default function App() {
   }
 
   const { conversation, contact, currentAgent } = context;
-  const ziptime_lead_id = contact.custom_attributes?.ziptime_lead_id;
-  const hasZiptimeId = Boolean(ziptime_lead_id);
+  const hasZiptimeId = Boolean(contact.custom_attributes?.ziptime_lead_id);
 
   // Funções de manipulação
   const handleToggleMessage = (messageId) => {
@@ -73,7 +71,7 @@ export default function App() {
   };
 
   const handleSend = async () => {
-    if (!hasZiptimeId || selectedIds.size === 0) {
+    if (!localLeadId || selectedIds.size === 0) {
       return;
     }
 
@@ -101,7 +99,8 @@ export default function App() {
         }));
 
       await saveToCRM({
-        ziptime_lead_id: contact.custom_attributes?.ziptime_lead_id || '',
+        ziptime_lead_id: localLeadId,
+        needs_chatwoot_update: !hasZiptimeId,
         chatwoot_conversation_id: conversation.id,
         chatwoot_contact_id: contact.id,
         contact_name: contact.name,
@@ -133,26 +132,6 @@ export default function App() {
     setSendError('');
   };
 
-  const handleSaveLeadId = async (leadId) => {
-    try {
-      await saveLeadId({
-        chatwoot_contact_id: contact.id,
-        ziptime_lead_id: leadId
-      });
-
-      setTimeout(() => {
-        window.parent.postMessage('chatwoot-dashboard-app:fetch-info', '*');
-      }, 1500);
-
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message || 'Erro ao salvar Lead ID'
-      };
-    }
-  };
-
   return (
     <div className="min-h-screen p-3 font-inter" style={{ backgroundColor: 'rgb(243, 244, 246)' }}>
       <div className="max-w-2xl mx-auto">
@@ -160,12 +139,8 @@ export default function App() {
           contact={contact}
           conversation={conversation}
           onRefresh={handleRefresh}
-        />
-
-        <ZiptimeAlert
-          show={!hasZiptimeId}
-          contactId={contact.id}
-          onSaveLeadId={handleSaveLeadId}
+          localLeadId={localLeadId}
+          setLocalLeadId={setLocalLeadId}
         />
 
         <MessageList
@@ -178,7 +153,8 @@ export default function App() {
 
         <SendButton
           selectedCount={selectedIds.size}
-          disabled={!hasZiptimeId || selectedIds.size === 0}
+          disabled={selectedIds.size === 0}
+          localLeadId={localLeadId}
           onSend={handleSend}
           status={sendStatus}
           errorMsg={sendError}

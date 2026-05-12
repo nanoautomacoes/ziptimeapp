@@ -6,6 +6,7 @@ export function useChatwootContext() {
   const [context, setContext] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timedOut, setTimedOut] = useState(false);
+  const [localLeadId, setLocalLeadId] = useState('');
   const timeoutRef = useRef(null);
 
   const startTimeout = () => {
@@ -51,6 +52,7 @@ export function useChatwootContext() {
 
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setContext(data.data);
+      setLocalLeadId(data.data.contact.custom_attributes?.ziptime_lead_id || '');
       setLoading(false);
       setTimedOut(false);
     };
@@ -65,5 +67,5 @@ export function useChatwootContext() {
     };
   }, []);
 
-  return { context, loading, timedOut, retry };
+  return { context, loading, timedOut, retry, localLeadId, setLocalLeadId };
 }

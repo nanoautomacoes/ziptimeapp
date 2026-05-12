@@ -1,6 +1,7 @@
 export function SendButton({
   selectedCount,
   disabled,
+  localLeadId,
   onSend,
   status = 'idle',
   errorMsg = '',
@@ -10,13 +11,14 @@ export function SendButton({
   const isLoading = status === 'loading';
   const isSuccess = status === 'success';
   const isError = status === 'error';
+  const isDisabled = disabled || !localLeadId || isLoading;
 
-  const buttonClasses = disabled || isLoading
+  const buttonClasses = isDisabled
     ? 'bg-gray-400 cursor-not-allowed'
     : 'bg-blue-600 hover:bg-blue-700 transition-colors';
 
   const handleClick = () => {
-    if (!disabled && !isLoading) {
+    if (!isDisabled) {
       onSend();
     }
   };
@@ -56,7 +58,7 @@ export function SendButton({
       {/* Botão de envio */}
       <button
         onClick={handleClick}
-        disabled={disabled || isLoading}
+        disabled={isDisabled}
         className={`w-full py-2 px-4 rounded-md text-white font-medium text-sm transition-colors ${buttonClasses}`}
       >
         {isLoading ? (

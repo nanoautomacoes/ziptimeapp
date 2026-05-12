@@ -1,4 +1,4 @@
-export function ContactHeader({ contact, conversation, onRefresh }) {
+export function ContactHeader({ contact, conversation, onRefresh, localLeadId, setLocalLeadId }) {
   const getStatusBadgeStyle = () => {
     const baseClasses = 'inline-block px-3 py-1 rounded-full text-xs font-medium text-white';
     switch (conversation.status) {
@@ -44,10 +44,28 @@ export function ContactHeader({ contact, conversation, onRefresh }) {
           <span className="text-lg">↻</span>
         </button>
       </div>
-      <div>
+      <div className="flex items-center justify-between">
         <span className={getStatusBadgeStyle()}>
           {getStatusLabel()}
         </span>
+        <div className="flex items-center gap-2">
+          {contact.custom_attributes?.ziptime_lead_id ? (
+            <div className="text-xs text-gray-600">
+              Ziptime ID: <span className="font-medium">{contact.custom_attributes.ziptime_lead_id}</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-lg">⚠️</span>
+              <input
+                type="text"
+                value={localLeadId}
+                onChange={(e) => setLocalLeadId(e.target.value)}
+                placeholder="ID do lead no Ziptime"
+                className="px-2 py-1 border border-yellow-300 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-yellow-500"
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
