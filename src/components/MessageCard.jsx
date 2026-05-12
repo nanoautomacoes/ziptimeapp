@@ -1,6 +1,8 @@
 import { formatDate } from '../utils/formatters.js';
 
 export function MessageCard({ message, isSelected, onToggle }) {
+  if (!message || !message.content) return null;
+
   const isIncoming = message.message_type === 0;
 
   const handleClick = () => {
@@ -35,7 +37,7 @@ export function MessageCard({ message, isSelected, onToggle }) {
         {/* Conteúdo da mensagem */}
         <div className="pr-6">
           <div className="text-xs font-semibold text-gray-700 mb-1">
-            {message.sender.name}
+            {message.sender?.name || 'Sistema'}
           </div>
           <div className="text-gray-800 text-sm mb-2 break-words">
             {message.content}

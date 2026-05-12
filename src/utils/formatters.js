@@ -5,13 +5,14 @@
  */
 export function parseEventData(event) {
   try {
-    // Se data for string, fazer JSON.parse
     let data = event.data;
+
+    // Ignora strings que não são JSON (ex: "chatwoot-dashboard-app:fetch-info")
     if (typeof data === 'string') {
+      if (!data.startsWith('{')) return null; // ← adiciona essa linha
       data = JSON.parse(data);
     }
 
-    // Validar estrutura
     if (!data || typeof data !== 'object') {
       return null;
     }
@@ -33,7 +34,6 @@ export function parseEventData(event) {
     return null;
   }
 }
-
 /**
  * Formata timestamp unix (segundos) para string "HH:mm dd/MM"
  * @param {number} unixTimestamp - Timestamp em segundos

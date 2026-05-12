@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useChatwootContext } from './hooks/useChatwootContext.js';
 import { saveToCRM } from './services/n8n.js';
+import { formatToISO } from './utils/formatters.js';
 import { LoadingSpinner } from './components/LoadingSpinner.jsx';
 import { ErrorState } from './components/ErrorState.jsx';
 import { ContactHeader } from './components/ContactHeader.jsx';
@@ -84,7 +85,32 @@ export default function App() {
         selectedIds.has(msg.id)
       );
 
-      await saveToCRM(context, selectedMessages);
+      const cleanMessages = selectedMessages
+        .filter(msg =>
+          msg.message_type !== 2 &&
+          msg.private !== true &&
+          msg.content &&
+          msg.sender?.name !== 'Sistema'
+        )
+        .map(msg => ({
+          id: msg.id,
+          content: msg.content,
+          message_type: msg.message_type,
+          sender_name: msg.sender?.name || 'Sistema',
+          sent_at: formatToISO(msg.created_at)
+        }));
+
+      await saveToCRM({
+        ziptime_lead_id: contact.custom_attributes?.ziptime_lead_id || '',
+        chatwoot_conversation_id: conversation.id,
+        chatwoot_contact_id: contact.id,
+        contact_name: contact.name,
+        contact_email: contact.email || '',
+        contact_phone: contact.phone_number || '',
+        agent_name: currentAgent.name,
+        sent_at: new Date().toISOString(),
+        selected_messages: cleanMessages
+      });
 
       setSendStatus('success');
 
