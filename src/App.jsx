@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useChatwootContext } from './hooks/useChatwootContext.js';
-import { saveToCRM } from './services/n8n.js';
+import { saveToCRM, saveLeadId } from './services/n8n.js';
 import { formatToISO } from './utils/formatters.js';
 import { LoadingSpinner } from './components/LoadingSpinner.jsx';
 import { ErrorState } from './components/ErrorState.jsx';
@@ -133,6 +133,26 @@ export default function App() {
     setSendError('');
   };
 
+  const handleSaveLeadId = async (leadId) => {
+    try {
+      await saveLeadId({
+        chatwoot_contact_id: contact.id,
+        ziptime_lead_id: leadId
+      });
+
+      setTimeout(() => {
+        window.parent.postMessage('chatwoot-dashboard-app:fetch-info', '*');
+      }, 1500);
+
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'Erro ao salvar Lead ID'
+      };
+    }
+  };
+
   return (
     <div className="min-h-screen p-3 font-inter" style={{ backgroundColor: 'rgb(243, 244, 246)' }}>
       <div className="max-w-2xl mx-auto">
@@ -142,7 +162,11 @@ export default function App() {
           onRefresh={handleRefresh}
         />
 
-        <ZiptimeAlert show={!hasZiptimeId} />
+        <ZiptimeAlert
+          show={!hasZiptimeId}
+          contactId={contact.id}
+          onSaveLeadId={handleSaveLeadId}
+        />
 
         <MessageList
           messages={conversation.messages}

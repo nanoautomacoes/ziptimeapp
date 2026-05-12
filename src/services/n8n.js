@@ -1,6 +1,7 @@
 import { formatToISO } from '../utils/formatters.js';
 
 const WEBHOOK_URL = import.meta.env.VITE_N8N_SAVE_CRM_URL;
+const SAVE_LEAD_ID_URL = import.meta.env.VITE_N8N_SAVE_LEAD_ID_URL;
 
 export async function saveToCRM({
   ziptime_lead_id,
@@ -39,20 +40,20 @@ export async function saveToCRM({
 }
 
 export async function saveLeadId({ chatwoot_contact_id, ziptime_lead_id }) {
-  if (!WEBHOOK_URL) {
-    throw new Error('URL do webhook n8n não configurada. Adicione VITE_N8N_SAVE_CRM_URL ao .env');
+  if (!SAVE_LEAD_ID_URL) {
+    throw new Error('URL do webhook n8n não configurada. Adicione VITE_N8N_SAVE_LEAD_ID_URL ao .env');
   }
 
-  const response = await fetch(WEBHOOK_URL, {
+  const response = await fetch(SAVE_LEAD_ID_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'save_lead_id',
-      chatwoot_contact_id,
-      ziptime_lead_id
-    })
+    body: JSON.stringify({ chatwoot_contact_id, ziptime_lead_id })
   });
 
-  if (!response.ok) throw new Error('Erro ao salvar Lead ID');
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || 'Erro ao salvar Lead ID');
+  }
+
   return await response.json();
 }
