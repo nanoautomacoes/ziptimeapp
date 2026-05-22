@@ -27,13 +27,6 @@ export function useChatwootContext() {
 
   useEffect(() => {
     const handleMessage = (event) => {
-      // Log ALL messages for debugging
-      console.log('RAW postMessage:', {
-        origin: event.origin,
-        dataType: typeof event.data,
-        data: event.data
-      });
-
       let data = event.data;
 
       // Se for string que não começa com {, ignorar

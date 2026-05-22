@@ -282,6 +282,45 @@ No DevTools → Network tab:
 
 ---
 
+## Deploy em Produção
+
+### Variáveis de ambiente necessárias
+
+- `VITE_N8N_SAVE_CRM_URL`: URL do webhook n8n (interna Docker em produção)
+- `VITE_WEBHOOK_SECRET`: Secret compartilhado com o n8n (gerar com: `openssl rand -hex 32`)
+
+### Build e deploy
+
+1. Copiar `.env.example` para `.env` e preencher os valores
+2. `docker build -t chatwoot-ziptime-app .`
+3. `docker run -p 3000:80 chatwoot-ziptime-app`
+
+### No EasyPanel
+
+1. Criar novo serviço → App
+2. Apontar para o repositório
+3. Build command: (vazio — o Dockerfile já faz tudo)
+4. Adicionar as variáveis de ambiente no painel do EasyPanel
+5. A URL gerada pelo EasyPanel é a que deve ser registrada no Chatwoot
+   em: Settings → Integrations → Dashboard Apps
+
+### No n8n — validação do secret
+
+Adicionar no início do workflow um Code node com:
+
+```javascript
+const secret = $input.first().json.headers['x-webhook-secret'];
+const expected = $env.WEBHOOK_SECRET;
+if (!secret || secret !== expected) {
+  throw new Error('Unauthorized');
+}
+```
+
+Configurar `WEBHOOK_SECRET` nas variáveis de ambiente do container n8n
+com o mesmo valor do `VITE_WEBHOOK_SECRET` do frontend.
+
+---
+
 ## 🚀 Deploy
 
 ### Com EasyPanel (Recomendado)

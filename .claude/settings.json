@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//root/ziptimeapp/src/services/**)",
+      "Read(///wsl.localhost/Ubuntu/root/ziptimeapp/src/services/**)",
+      "Read(//root/ziptimeapp/**)",
+      "Read(///wsl.localhost/Ubuntu/root/ziptimeapp/**)",
+      "Read(//root/ziptimeapp/src/hooks/**)",
+      "Read(///wsl.localhost/Ubuntu/root/ziptimeapp/src/hooks/**)"
+    ]
+  }
+}

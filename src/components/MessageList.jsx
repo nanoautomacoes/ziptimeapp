@@ -8,12 +8,27 @@ export function MessageList({
   onClearAll
 }) {
   // Filtrar mensagens privadas (private === false), excluir mensagens de sistema (message_type === 2) e ordenar por created_at
-  const visibleMessages = messages.filter(msg =>
-    msg.message_type !== 2 &&
-    msg.private !== true &&
-    msg.content &&
-    msg.sender != null
-  )
+  const visibleMessages = messages.filter(msg => {
+    const passes = msg.message_type !== 2 &&
+      msg.private !== true &&
+      msg.content &&
+      msg.sender != null;
+
+    if (!passes && import.meta.env.DEV) {
+      console.log('Mensagem filtrada:', {
+        id: msg.id,
+        content: msg.content,
+        message_type: msg.message_type,
+        private: msg.private,
+        sender: msg.sender,
+        reason: !msg.content ? 'sem content' :
+                msg.message_type === 2 ? 'message_type===2' :
+                msg.private === true ? 'private===true' :
+                msg.sender == null ? 'sem sender' : 'unknown'
+      });
+    }
+    return passes;
+  })
   .sort((a, b) => a.created_at - b.created_at);
 
   return (

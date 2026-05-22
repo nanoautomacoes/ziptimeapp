@@ -7,6 +7,7 @@ import { ErrorState } from './components/ErrorState.jsx';
 import { ContactHeader } from './components/ContactHeader.jsx';
 import { MessageList } from './components/MessageList.jsx';
 import { SendButton } from './components/SendButton.jsx';
+import { ErrorBoundary } from './components/ErrorBoundary.jsx';
 
 export default function App() {
   const { context, loading, timedOut, retry, localLeadId, setLocalLeadId } = useChatwootContext();
@@ -133,38 +134,40 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen p-3 font-inter" style={{ backgroundColor: 'rgb(243, 244, 246)' }}>
-      <div className="max-w-2xl mx-auto">
-        <ContactHeader
-          contact={contact}
-          conversation={conversation}
-          onRefresh={handleRefresh}
-          localLeadId={localLeadId}
-          setLocalLeadId={setLocalLeadId}
-        />
+    <ErrorBoundary>
+      <div className="min-h-screen p-3 font-inter" style={{ backgroundColor: 'rgb(243, 244, 246)' }}>
+        <div className="max-w-2xl mx-auto">
+          <ContactHeader
+            contact={contact}
+            conversation={conversation}
+            onRefresh={handleRefresh}
+            localLeadId={localLeadId}
+            setLocalLeadId={setLocalLeadId}
+          />
 
-        <MessageList
-          messages={conversation.messages}
-          selectedIds={selectedIds}
-          onToggle={handleToggleMessage}
-          onSelectAll={handleSelectAll}
-          onClearAll={handleClearAll}
-        />
+          <MessageList
+            messages={conversation.messages}
+            selectedIds={selectedIds}
+            onToggle={handleToggleMessage}
+            onSelectAll={handleSelectAll}
+            onClearAll={handleClearAll}
+          />
 
-        <SendButton
-          selectedCount={selectedIds.size}
-          disabled={selectedIds.size === 0}
-          localLeadId={localLeadId}
-          onSend={handleSend}
-          status={sendStatus}
-          errorMsg={sendError}
-          onRetry={handleRetry}
-          onSuccess={() => {
-            setSelectedIds(new Set());
-            setSendStatus('idle');
-          }}
-        />
+          <SendButton
+            selectedCount={selectedIds.size}
+            disabled={selectedIds.size === 0}
+            localLeadId={localLeadId}
+            onSend={handleSend}
+            status={sendStatus}
+            errorMsg={sendError}
+            onRetry={handleRetry}
+            onSuccess={() => {
+              setSelectedIds(new Set());
+              setSendStatus('idle');
+            }}
+          />
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }

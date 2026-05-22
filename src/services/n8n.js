@@ -18,7 +18,10 @@ export async function saveToCRM({
 
   const response = await fetch(WEBHOOK_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Webhook-Secret': import.meta.env.VITE_WEBHOOK_SECRET || ''
+    },
     body: JSON.stringify({
       action: 'save_messages',
       ziptime_lead_id,
